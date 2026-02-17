@@ -23,24 +23,37 @@ __suggest_file_bat_default_opts="--color=always --line-range=:500 --style=number
 # ---------------------------------------------------------------------------
 
 # __suggest_file_widget runs suggest-file, pipes results through fzf, and
-# inserts the selected path(s) into the current command line.
+# replaces the current word on the command line with the selected path(s).
 __suggest_file_widget() {
   local sf_opts="${SUGGEST_FILE_OPTS:-}"
   local fzf_opts="${SUGGEST_FILE_FZF_OPTS:-$__suggest_file_fzf_default_opts}"
   local bat_opts="${SUGGEST_FILE_BAT_OPTS:-$__suggest_file_bat_default_opts}"
 
+  # Extract the current word (token left of the cursor, delimited by spaces).
+  # This is passed to suggest-file as a glob pattern.
+  local current_word="${LBUFFER##* }"
+  local prefix="${LBUFFER%$current_word}"
+
   # Build the fzf preview command using bat.
   local preview_cmd="bat ${bat_opts} -- {}"
 
-  # Run suggest-file and pipe into fzf.
-  # ${=var} performs word-splitting in zsh (safe alternative to eval).
-  # suggest-file errors are shown on stderr; fzf stderr is suppressed.
+  # If the current word is non-empty, use it as the suggest-file pattern.
+  # Otherwise, suggest-file runs with no args (recursive listing).
   local result
-  result="$(
-    suggest-file ${=sf_opts} \
-      | fzf ${=fzf_opts} --preview="${preview_cmd}" \
-      2>/dev/null
-  )"
+  if [[ -n "$current_word" ]]; then
+    result="$(
+      suggest-file ${=sf_opts} "$current_word" \
+        | fzf ${=fzf_opts} --preview="${preview_cmd}" \
+          --query="${current_word:t}" \
+        2>/dev/null
+    )"
+  else
+    result="$(
+      suggest-file ${=sf_opts} \
+        | fzf ${=fzf_opts} --preview="${preview_cmd}" \
+        2>/dev/null
+    )"
+  fi
 
   if [[ -n "$result" ]]; then
     # Quote each selected path and join with spaces.
@@ -49,8 +62,8 @@ __suggest_file_widget() {
       quoted+="${(q)line} "
     done <<< "$result"
 
-    # Insert the selected file(s) at the cursor position.
-    LBUFFER+="${quoted% }"
+    # Replace the current word with the selected file(s).
+    LBUFFER="${prefix}${quoted% }"
   fi
 
   # Redraw the prompt.
