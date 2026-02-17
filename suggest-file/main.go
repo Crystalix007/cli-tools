@@ -21,7 +21,7 @@ func main() {
 		fmt.Println("")
 		fmt.Println("Argument resolution:")
 		fmt.Println("  DIRECTORY          Recursively list all files under it (e.g. ~, ~/Downloads, .)")
-		fmt.Println("  PATH/             Trailing slash: list files in that directory only (one level)")
+		fmt.Println("  PATH/             Trailing slash: list files in that directory recursively")
 		fmt.Println("  PREFIX            Match entries starting with prefix, walk matching dirs")
 		fmt.Println("  GLOB              Standard glob with *, ?, [, ** for recursive matching")
 		fmt.Println("")

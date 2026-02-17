@@ -7,8 +7,8 @@
 //  1. Expand tilde (~) to the user's home directory.
 //  2. If the argument contains glob metacharacters (*, ?, [, {) → doublestar
 //     glob expansion.
-//  3. If the argument ends with '/' → list files in that directory only
-//     (one level deep, non-recursive).
+//  3. If the argument ends with '/' → recursively list files in that
+//     directory only (not prefix-matched).
 //  4. If the argument resolves to an existing regular file → return it.
 //  5. If the argument resolves to an existing directory → recursively walk
 //     it using the walker package.
@@ -57,9 +57,9 @@ func Expand(pattern string) ([]string, error) {
 	// the trailing slash (filepath.Clean strips it).
 	cleaned := filepath.Clean(expanded)
 
-	// Step 3: Trailing slash → list files in that directory (one level).
+	// Step 3: Trailing slash → list files in that directory recursively.
 	if trailingSlash {
-		return walker.ListDir(cleaned)
+		return walker.WalkCollect(cleaned)
 	}
 
 	// Step 4/5: Stat the path to determine if it's a file or directory.
