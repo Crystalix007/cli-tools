@@ -34,6 +34,10 @@ func IsIncludableFile(path string, mode fs.FileMode) bool {
 func walkFiltered(root string, emit func(path string)) error {
 	return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
+			if os.IsPermission(err) {
+				return nil
+			}
+
 			fmt.Fprintf(os.Stderr, "suggest-file: %v\n", err)
 			return nil
 		}

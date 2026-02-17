@@ -45,13 +45,13 @@ __suggest_file_widget() {
   local result
   if [[ -n "$current_word" ]]; then
     result="$(
-      suggest-file $sf_opts "$current_word" \
+      suggest-file $sf_opts "$current_word" 2>/dev/null \
         | fzf $fzf_opts --preview="${preview_cmd}" \
         2>/dev/null
     )"
   else
     result="$(
-      suggest-file $sf_opts \
+      suggest-file $sf_opts 2>/dev/null \
         | fzf $fzf_opts --preview="${preview_cmd}" \
         2>/dev/null
     )"

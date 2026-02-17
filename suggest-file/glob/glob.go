@@ -72,9 +72,9 @@ func Expand(pattern string) ([]string, error) {
 			// Exact file match — return it directly.
 			return []string{cleaned}, nil
 		}
-	} else if !os.IsNotExist(err) {
-		// Real error (e.g. permission denied) — surface it instead of
-		// silently falling through to prefix matching.
+	} else if !os.IsNotExist(err) && !os.IsPermission(err) {
+		// Real error — surface it instead of silently falling through
+		// to prefix matching.
 		return nil, fmt.Errorf("stat %q: %w", cleaned, err)
 	}
 
@@ -124,6 +124,9 @@ func expandPrefix(path string) ([]string, error) {
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {
+		if os.IsPermission(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("reading directory %q: %w", dir, err)
 	}
 
@@ -153,6 +156,9 @@ func expandPrefix(path string) ([]string, error) {
 			// Directory matching prefix — walk recursively.
 			collected, err := walker.WalkCollect(full)
 			if err != nil {
+				if os.IsPermission(err) {
+					continue
+				}
 				return nil, err
 			}
 			results = append(results, collected...)
