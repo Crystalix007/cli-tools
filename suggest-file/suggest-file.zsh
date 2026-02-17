@@ -44,7 +44,6 @@ __suggest_file_widget() {
     result="$(
       suggest-file ${=sf_opts} "$current_word" \
         | fzf ${=fzf_opts} --preview="${preview_cmd}" \
-          --query="${current_word:t}" \
         2>/dev/null
     )"
   else
