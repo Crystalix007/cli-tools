@@ -13,8 +13,6 @@ import (
 	"github.com/Crystalix007/cli-tools/suggest-file/walker"
 )
 
-var shellFlag string
-
 var rootCmd = &cobra.Command{
 	Use:   "suggest-file [PATTERN ...]",
 	Short: "List files matching patterns. With no arguments, list all files recursively.",
@@ -35,15 +33,6 @@ Supports ~ expansion to home directory.`,
   suggest-file '~/.config/*.yaml'  # yaml files in ~/.config
   suggest-file '**/*.go'           # all Go files recursively`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if shellFlag != "" {
-			script, ok := shellWrapper(shellFlag)
-			if !ok {
-				return fmt.Errorf("unknown shell %q (supported: bash, zsh)", shellFlag)
-			}
-			fmt.Print(script)
-			return nil
-		}
-
 		// If no arguments provided, default to recursive listing of the current directory.
 		if len(args) == 0 {
 			if err := walker.Walk("."); err != nil {
@@ -74,10 +63,6 @@ Supports ~ expansion to home directory.`,
 		}
 		return nil
 	},
-}
-
-func init() {
-	rootCmd.Flags().StringVar(&shellFlag, "shell", "", "Enable suggest-file completion in your shell (bash|zsh). Prints a snippet to stdout; source it in your rc file.")
 }
 
 func main() {
