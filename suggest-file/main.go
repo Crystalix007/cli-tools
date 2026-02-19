@@ -17,7 +17,12 @@ func main() {
 	// Handle help flag.
 	if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
 		fmt.Println("Usage: suggest-file [PATTERN ...]")
+		fmt.Println("       suggest-file --shell bash|zsh")
 		fmt.Println("List files matching patterns. With no arguments, list all files recursively.")
+		fmt.Println("")
+		fmt.Println("Options:")
+		fmt.Println("  --shell bash|zsh  Enable suggest-file completion in your shell.")
+		fmt.Println("                    Prints a snippet to stdout; source it in your rc file.")
 		fmt.Println("")
 		fmt.Println("Argument resolution:")
 		fmt.Println("  DIRECTORY          Recursively list all files under it (e.g. ~, ~/Downloads, .)")
@@ -35,6 +40,21 @@ func main() {
 		fmt.Println("  suggest-file ~/D                  # files under ~/Downloads, ~/Documents, etc.")
 		fmt.Println("  suggest-file '~/.config/*.yaml'  # yaml files in ~/.config")
 		fmt.Println("  suggest-file '**/*.go'           # all Go files recursively")
+		return
+	}
+
+	// Handle --shell flag.
+	if len(args) >= 1 && args[0] == "--shell" {
+		if len(args) < 2 {
+			fmt.Fprintln(os.Stderr, "suggest-file: --shell requires an argument (bash or zsh)")
+			os.Exit(1)
+		}
+		script, ok := shellWrapper(args[1])
+		if !ok {
+			fmt.Fprintf(os.Stderr, "suggest-file: unknown shell %q (supported: bash, zsh)\n", args[1])
+			os.Exit(1)
+		}
+		fmt.Print(script)
 		return
 	}
 
