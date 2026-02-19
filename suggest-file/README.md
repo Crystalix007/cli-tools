@@ -23,10 +23,10 @@ Source the appropriate script to bind **Ctrl-T** to fuzzy file selection:
 
 ```sh
 # ZSH
-source /path/to/suggest-file.zsh
+source <(suggest-file shell zsh)
 
 # Bash (>= 4.0)
-source /path/to/suggest-file.bash
+source <(suggest-file shell bash)
 ```
 
 ### Customisation
